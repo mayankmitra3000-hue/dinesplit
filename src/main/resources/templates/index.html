@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>DineSplit</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+
+<div class="max-w-3xl mx-auto px-4 py-10">
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+
+        <h1 class="text-4xl font-bold text-gray-900">
+            DineSplit
+        </h1>
+
+        <p class="text-gray-500 mt-2">
+            Split your restaurant bill easily
+        </p>
+
+    </div>
+
+
+    <!-- Main Card -->
+    <div class="bg-white rounded-2xl shadow-sm p-6">
+
+        <!-- Bill Name -->
+        <div class="mb-6">
+
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                Bill Name
+            </label>
+
+            <input
+                    id="billName"
+                    type="text"
+                    placeholder="Friday Dinner"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2
+                           focus:outline-none focus:ring-2 focus:ring-black"
+            >
+
+        </div>
+
+
+        <!-- People -->
+        <div class="mb-6">
+
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                People
+            </label>
+
+            <input
+                    id="people"
+                    type="text"
+                    placeholder="Mayank, Rahul, Aman, Priya"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2
+                           focus:outline-none focus:ring-2 focus:ring-black"
+            >
+
+            <p class="text-xs text-gray-400 mt-1">
+                Separate names using commas
+            </p>
+
+        </div>
+
+
+        <!-- Items -->
+        <div class="mb-6">
+
+            <div class="flex justify-between items-center mb-3">
+
+                <label class="block text-sm font-medium text-gray-700">
+                    Items
+                </label>
+
+                <button
+                        type="button"
+                        onclick="addItem()"
+                        class="text-sm bg-black text-white px-3 py-1.5
+                               rounded-lg hover:bg-gray-800">
+                    + Add Item
+                </button>
+
+            </div>
+
+
+            <div id="items">
+
+                <!-- First item -->
+                <div class="item-row flex gap-2 mb-2">
+
+                    <input
+                            type="text"
+                            placeholder="Item name"
+                            class="item-name flex-1 border border-gray-300
+                                   rounded-lg px-3 py-2"
+                    >
+
+                    <input
+                            type="number"
+                            placeholder="Price"
+                            step="0.01"
+                            class="item-price w-32 border border-gray-300
+                                   rounded-lg px-3 py-2"
+                    >
+
+                    <input
+                            type="text"
+                            placeholder="People"
+                            class="item-people w-48 border border-gray-300
+                                   rounded-lg px-3 py-2"
+                    >
+
+                </div>
+
+            </div>
+
+            <p class="text-xs text-gray-400 mt-2">
+                Example: Pizza | 800 | Mayank, Rahul
+            </p>
+
+        </div>
+
+
+        <!-- Charges -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+
+            <div>
+
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Service Charge
+                </label>
+
+                <input
+                        id="serviceCharge"
+                        type="number"
+                        value="0"
+                        step="0.01"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2"
+                >
+
+            </div>
+
+
+            <div>
+
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Tax
+                </label>
+
+                <input
+                        id="tax"
+                        type="number"
+                        value="0"
+                        step="0.01"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2"
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- Error -->
+        <div
+                id="error"
+                class="hidden bg-red-50 text-red-600 rounded-lg
+                       p-3 mb-4 text-sm">
+        </div>
+
+
+        <!-- Button -->
+        <button
+                onclick="splitBill()"
+                class="w-full bg-black text-white py-3 rounded-lg
+                       font-medium hover:bg-gray-800">
+
+            Split Bill
+
+        </button>
+
+    </div>
+
+
+    <!-- Result -->
+    <div
+            id="result"
+            class="hidden bg-white rounded-2xl shadow-sm p-6 mt-6">
+
+        <h2 class="text-xl font-bold mb-4">
+            Bill Summary
+        </h2>
+
+
+        <div
+                id="billSummary"
+                class="grid grid-cols-2 gap-3 text-sm mb-6">
+        </div>
+
+
+        <h3 class="font-semibold mb-3">
+            Amount per person
+        </h3>
+
+
+        <div id="peopleResult"></div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    /*
+     * Add another item row
+     */
+    function addItem() {
+
+        const container =
+            document.getElementById("items");
+
+        const row =
+            document.createElement("div");
+
+        row.className =
+            "item-row flex gap-2 mb-2";
+
+        row.innerHTML = `
+
+            <input
+                type="text"
+                placeholder="Item name"
+                class="item-name flex-1 border border-gray-300
+                       rounded-lg px-3 py-2"
+            >
+
+            <input
+                type="number"
+                placeholder="Price"
+                step="0.01"
+                class="item-price w-32 border border-gray-300
+                       rounded-lg px-3 py-2"
+            >
+
+            <input
+                type="text"
+                placeholder="People"
+                class="item-people w-48 border border-gray-300
+                       rounded-lg px-3 py-2"
+            >
+
+        `;
+
+        container.appendChild(row);
+    }
+
+
+    /*
+     * Split bill
+     */
+    async function splitBill() {
+
+        const error =
+            document.getElementById("error");
+
+        error.classList.add("hidden");
+
+
+        // Bill name
+        const billName =
+            document.getElementById("billName")
+                .value.trim();
+
+
+        // People
+        const people =
+            document.getElementById("people")
+                .value
+                .split(",")
+                .map(name => name.trim())
+                .filter(name => name.length > 0);
+
+
+        // Items
+        const itemRows =
+            document.querySelectorAll(".item-row");
+
+        const items = [];
+
+
+        itemRows.forEach(row => {
+
+            const name =
+                row.querySelector(".item-name")
+                    .value.trim();
+
+            const price =
+                parseFloat(
+                    row.querySelector(".item-price")
+                        .value
+                );
+
+            const participants =
+                row.querySelector(".item-people")
+                    .value
+                    .split(",")
+                    .map(name => name.trim())
+                    .filter(name => name.length > 0);
+
+
+            if (name && !isNaN(price)) {
+
+                items.push({
+                    name: name,
+                    price: price,
+                    participants: participants
+                });
+
+            }
+
+        });
+
+
+        const serviceCharge =
+            parseFloat(
+                document.getElementById("serviceCharge")
+                    .value
+            ) || 0;
+
+
+        const tax =
+            parseFloat(
+                document.getElementById("tax")
+                    .value
+            ) || 0;
+
+
+        // Basic validation
+
+        if (!billName) {
+
+            showError("Please enter a bill name.");
+            return;
+
+        }
+
+
+        if (people.length === 0) {
+
+            showError("Please enter at least one person.");
+            return;
+
+        }
+
+
+        if (items.length === 0) {
+
+            showError("Please add at least one item.");
+            return;
+
+        }
+
+
+        // Request body
+
+        const request = {
+
+            name: billName,
+
+            people: people,
+
+            items: items,
+
+            serviceCharge: serviceCharge,
+
+            tax: tax
+
+        };
+
+
+        try {
+
+            const response =
+                await fetch("/api/bills", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify(request)
+
+                });
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                showError(
+                    data.error ||
+                    "Something went wrong."
+                );
+
+                return;
+
+            }
+
+
+            displayResult(data);
+
+        }
+        catch (err) {
+
+            showError(
+                "Unable to connect to server."
+            );
+
+        }
+
+    }
+
+
+    /*
+     * Display result
+     */
+    function displayResult(data) {
+
+        const result =
+            document.getElementById("result");
+
+        const summary =
+            document.getElementById("billSummary");
+
+        const peopleResult =
+            document.getElementById("peopleResult");
+
+
+        result.classList.remove("hidden");
+
+
+        summary.innerHTML = `
+
+            <div class="text-gray-500">
+                Subtotal
+            </div>
+
+            <div class="text-right font-medium">
+                ₹${data.subtotal.toFixed(2)}
+            </div>
+
+
+            <div class="text-gray-500">
+                Service Charge
+            </div>
+
+            <div class="text-right font-medium">
+                ₹${data.serviceCharge.toFixed(2)}
+            </div>
+
+
+            <div class="text-gray-500">
+                Tax
+            </div>
+
+            <div class="text-right font-medium">
+                ₹${data.tax.toFixed(2)}
+            </div>
+
+
+            <div class="font-semibold">
+                Total
+            </div>
+
+            <div class="text-right font-bold text-lg">
+                ₹${data.total.toFixed(2)}
+            </div>
+
+        `;
+
+
+        peopleResult.innerHTML = "";
+
+
+        data.people.forEach(person => {
+
+            const row =
+                document.createElement("div");
+
+            row.className =
+                "flex justify-between items-center " +
+                "border-b border-gray-100 py-3";
+
+
+            row.innerHTML = `
+
+                <span class="font-medium">
+                    ${escapeHtml(person.name)}
+                </span>
+
+                <span class="font-bold">
+                    ₹${person.amount.toFixed(2)}
+                </span>
+
+            `;
+
+
+            peopleResult.appendChild(row);
+
+        });
+
+
+        // Scroll to result
+
+        result.scrollIntoView({
+            behavior: "smooth"
+        });
+
+    }
+
+
+    /*
+     * Show error
+     */
+    function showError(message) {
+
+        const error =
+            document.getElementById("error");
+
+        error.textContent = message;
+
+        error.classList.remove("hidden");
+
+    }
+
+
+    /*
+     * Prevent HTML injection
+     */
+    function escapeHtml(value) {
+
+        return value
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+
+    }
+
+</script>
+
+</body>
+</html>
